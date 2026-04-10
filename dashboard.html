@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GrandStay Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{font-family:Segoe UI;margin:0;background:#f4f6f9;}
+
+/* LOGIN */
+#loginPage{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-box{
+  background:#fff;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+  width:300px;
+  text-align:center;
+}
+
+.login-box input{
+  width:90%;
+  padding:10px;
+  margin:10px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+.login-box button{
+  width:100%;
+  padding:10px;
+  background:#2a5298;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* DASHBOARD */
+#dashboard{display:none;}
+
+.header{
+  background:#fff;
+  padding:12px 20px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  font-weight:600;
+}
+
+.container{
+  width:85%;
+  margin:20px auto;
+}
+
+.kpi{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.box{
+  background:#fff;
+  padding:15px;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+.box h4{font-size:13px;color:#666;margin:0;}
+.box p{margin:5px 0;font-size:20px;font-weight:600;}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:15px;
+}
+
+.card{
+  background:#fff;
+  padding:12px;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+canvas{height:220px !important;}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-box">
+    <h3>GrandStay Login</h3>
+    <input type="email" id="email" placeholder="Enter Email">
+    <button onclick="login()">Login</button>
+    <p id="error" style="color:red;"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+<div class="header">🏨 GrandStay Revenue Dashboard</div>
+
+<div class="container">
+
+<div class="kpi">
+  <div class="box"><h4>Total Revenue</h4><p id="rev"></p></div>
+  <div class="box"><h4>Total Bookings</h4><p id="book"></p></div>
+  <div class="box"><h4>Avg Guest Rating</h4><p id="rate"></p></div>
+  <div class="box"><h4>RevPAR</h4><p id="revpar"></p></div>
+</div>
+
+<div class="grid">
+  <div class="card"><h4>Revenue by Property</h4><canvas id="bar"></canvas></div>
+  <div class="card"><h4>Monthly Trend</h4><canvas id="line"></canvas></div>
+  <div class="card"><h4>Booking Channels</h4><canvas id="pie"></canvas></div>
+</div>
+
+</div>
+</div>
+
+<script>
+// LOGIN FUNCTION
+function login(){
+  let email=document.getElementById("email").value;
+  if(email.includes("@")){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+    loadDashboard();
+  }else{
+    document.getElementById("error").innerText="Enter valid email!";
+  }
+}
+
+// DATA (embedded)
+const d=[
+ {prop:"GrandStay Chennai",date:"2024-01-02",rev:5200,rate:8.2,channel:"Online"},
+ {prop:"GrandStay Mumbai",date:"2024-01-05",rev:7800,rate:9.0,channel:"Offline"},
+ {prop:"GrandStay Delhi",date:"2024-02-10",rev:6100,rate:7.5,channel:"Online"},
+ {prop:"GrandStay Chennai",date:"2024-02-15",rev:8200,rate:9.1,channel:"Corporate"},
+ {prop:"GrandStay Mumbai",date:"2024-03-01",rev:7600,rate:8.4,channel:"Online"},
+ {prop:"GrandStay Delhi",date:"2024-03-12",rev:9100,rate:9.6,channel:"Offline"}
+];
+
+// LOAD DASHBOARD
+function loadDashboard(){
+
+let tr=0,rt=0,pr={},mb={},ch={};
+
+d.forEach(x=>{
+ tr+=x.rev;
+ rt+=x.rate;
+
+ pr[x.prop]=(pr[x.prop]||0)+x.rev;
+
+ let m=new Date(x.date).getMonth()+1;
+ mb[m]=(mb[m]||0)+1;
+
+ ch[x.channel]=(ch[x.channel]||0)+x.rev;
+});
+
+let n=d.length;
+
+// KPI
+rev.innerText=tr;
+book.innerText=n;
+rate.innerText=(rt/n).toFixed(2);
+revpar.innerText=(tr/n).toFixed(2);
+
+// CHARTS
+new Chart(bar,{
+ type:'bar',
+ data:{labels:Object.keys(pr),
+ datasets:[{label:"Revenue",data:Object.values(pr)}]}
+});
+
+new Chart(line,{
+ type:'line',
+ data:{labels:Object.keys(mb),
+ datasets:[{label:"Bookings",data:Object.values(mb)}]}
+});
+
+new Chart(pie,{
+ type:'doughnut',
+ data:{
+  labels:["Online","Offline","Corporate"],
+  datasets:[{
+    data:[
+      ch["Online"]||0,
+      ch["Offline"]||0,
+      ch["Corporate"]||0
+    ]
+  }]
+ },
+ options:{plugins:{legend:{position:'bottom'}}}
+});
+
+}
+</script>
+
+</body>
+</html>
